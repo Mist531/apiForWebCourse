@@ -1,4 +1,4 @@
-package com.example.database.models
+package com.example.models
 
 import com.example.database.UUIDSerializer
 import kotlinx.serialization.Serializable

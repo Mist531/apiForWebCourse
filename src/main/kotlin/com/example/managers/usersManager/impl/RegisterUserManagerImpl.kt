@@ -1,6 +1,6 @@
 package com.example.managers.usersManager.impl
 
-import com.example.database.models.RegisterUserModel
+import com.example.models.RegisterUserModel
 import com.example.database.tables.User
 import com.example.database.tables.Users
 import com.example.managers.usersManager.RegisterUserManager

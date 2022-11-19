@@ -1,11 +1,14 @@
 package com.example.managersImpl
 
-
 import com.example.authorization.AuthUtil
-import com.example.authorization.models.*
-import com.example.database.models.*
+import com.example.authorization.models.LoginModel
+import com.example.authorization.models.TokensModel
+import com.example.managers.usersManager.GetUserManager
+import com.example.managers.usersManager.LoginUserManager
+import com.example.managers.usersManager.RegisterUserManager
+import com.example.models.GetUserModel
+import com.example.models.RegisterUserModel
 import com.example.params.UserId
-import com.example.managers.usersManager.*
 import io.ktor.http.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

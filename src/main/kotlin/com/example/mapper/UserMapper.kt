@@ -1,6 +1,6 @@
 package com.example.mapper
 
-import com.example.database.models.GetUserModel
+import com.example.models.GetUserModel
 import com.example.database.tables.User
 
 class UserMapper : Mapper<User, GetUserModel> {

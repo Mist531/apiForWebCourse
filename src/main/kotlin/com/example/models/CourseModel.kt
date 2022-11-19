@@ -1,4 +1,4 @@
-package com.example.database.models
+package com.example.models
 
 import com.example.database.UUIDSerializer
 import kotlinx.serialization.Serializable
@@ -10,4 +10,16 @@ data class CourseModel(
     val courseInfoId: UUID,
     val name:String,
     val description:String?
+)
+
+@Serializable
+data class CreateCourseModel(
+    val name:String,
+    val description:String?
+)
+
+@Serializable
+data class CourseIdModel(
+    @Serializable(with = UUIDSerializer::class)
+    val courseInfoId: UUID,
 )

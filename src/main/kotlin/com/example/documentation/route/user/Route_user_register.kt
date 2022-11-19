@@ -1,6 +1,6 @@
 package com.example.documentation.route.user
 
-import com.example.database.models.RegisterUserModel
+import com.example.models.RegisterUserModel
 import com.example.documentation.RegisterUsersModelTest
 import com.example.documentation.ResponseException
 import io.bkbn.kompendium.core.metadata.PostInfo

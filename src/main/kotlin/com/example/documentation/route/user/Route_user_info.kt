@@ -1,6 +1,6 @@
 package com.example.documentation.route.user
 
-import com.example.database.models.GetUserModel
+import com.example.models.GetUserModel
 import com.example.documentation.PutUsersModelTest
 import com.example.documentation.ResponseException
 import io.bkbn.kompendium.core.metadata.GetInfo
