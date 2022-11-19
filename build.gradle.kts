@@ -72,6 +72,9 @@ dependencies {
     //bd
     implementation("org.postgresql:postgresql:42.5.0")
 
+    //arrow
+    implementation("io.arrow-kt:arrow-fx-coroutines:1.1.2")
+
 /*    //Client Http
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")

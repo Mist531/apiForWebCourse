@@ -19,7 +19,9 @@ data class CreateCourseModel(
 )
 
 @Serializable
-data class CourseIdModel(
+data class PutCourseModel(
     @Serializable(with = UUIDSerializer::class)
     val courseInfoId: UUID,
+    val name:String?,
+    val description:String?
 )

@@ -2,12 +2,15 @@ package com.example.documentation.route
 
 import com.example.documentation.CreateCourseTest
 import com.example.documentation.GetListCourseTest
+import com.example.documentation.PutCourseModelTest
 import com.example.documentation.ResponseException
 import com.example.models.CourseModel
 import com.example.models.CreateCourseModel
+import com.example.models.PutCourseModel
 import io.bkbn.kompendium.core.metadata.DeleteInfo
 import io.bkbn.kompendium.core.metadata.GetInfo
 import io.bkbn.kompendium.core.metadata.PostInfo
+import io.bkbn.kompendium.core.metadata.PutInfo
 import io.bkbn.kompendium.core.plugin.NotarizedRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -77,6 +80,35 @@ fun Route.courseDocs() {
                 examples(
                     "Пример" to ResponseException(
                         message = "Курс с таким именем уже существует"
+                    )
+                )
+            }
+        }
+        put = PutInfo.builder {
+            tags("Admin Course")
+            summary("Обновление данных о курсе")
+            description(
+                "Доступно только администратору"
+            )
+            request {
+                requestType<PutCourseModel>()
+                description("Модель курса")
+                examples(
+                    "Пример" to PutCourseModelTest
+                )
+            }
+            response {
+                responseType<HttpStatusCode>()
+                responseCode(HttpStatusCode.OK)
+                description("Курс обновлен")
+            }
+            canRespond {
+                responseType<ResponseException>()
+                responseCode(HttpStatusCode.BadRequest)
+                description("Ошибка")
+                examples(
+                    "Пример" to ResponseException(
+                        message = "Курс не найден"
                     )
                 )
             }

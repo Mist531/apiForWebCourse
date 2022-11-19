@@ -6,11 +6,13 @@ import com.example.configure.configure
 import com.example.database.tables.*
 import com.example.documentation.route.courseDocs
 import com.example.documentation.route.healthcheckDocs
+import com.example.documentation.route.question.questionDocs
 import com.example.documentation.route.user.userInfoDocs
 import com.example.documentation.route.user.userLoginDocs
 import com.example.documentation.route.user.userRefreshDocs
 import com.example.documentation.route.user.userRegisterDocs
 import com.example.managersImpl.CourseManager
+import com.example.managersImpl.QuestionManager
 import com.example.managersImpl.UserManager
 import com.example.modules.managerModule
 import com.example.modules.managersImplModule
@@ -73,6 +75,7 @@ fun main() {
         )
         val userManager: UserManager by inject()
         val courseManager: CourseManager by inject()
+        val questionManager: QuestionManager by inject()
         routing {
             redoc()
             route("api") {
@@ -153,6 +156,53 @@ fun main() {
                                 }
                             } ?: call.respond(HttpStatusCode.Unauthorized)
                         }
+                        put {
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                if(adminId.toString() == id) {
+                                    call.respond(courseManager.updateCourse(call.receive()))
+                                } else {
+                                    call.respond(HttpStatusCode.Unauthorized)
+                                }
+                            } ?: call.respond(HttpStatusCode.Unauthorized)
+                        }
+                    }
+                    //endregion
+
+                    //region Question
+                    route("question"){
+                        questionDocs()
+                         post {
+                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                 if(adminId.toString() == id) {
+                                     call.respond(questionManager.addQuestion(call.receive()))
+                                 } else {
+                                     call.respond(HttpStatusCode.Unauthorized)
+                                 }
+                             } ?: call.respond(HttpStatusCode.Unauthorized)
+                         }
+                        get {
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                call.respond(questionManager.getAllQuestion(call.receive()))
+                            } ?: call.respond(HttpStatusCode.Unauthorized)
+                        }
+                         delete {
+                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                 if(adminId.toString() == id) {
+                                     call.respond(questionManager.deleteQuestion(call.receive()))
+                                 } else {
+                                     call.respond(HttpStatusCode.Unauthorized)
+                                 }
+                             } ?: call.respond(HttpStatusCode.Unauthorized)
+                         }
+                         /*put {
+                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                 if(adminId.toString() == id) {
+                                     call.respond(questionManager.updateQuestion(call.receive()))
+                                 } else {
+                                     call.respond(HttpStatusCode.Unauthorized)
+                                 }
+                             } ?: call.respond(HttpStatusCode.Unauthorized)
+                         }*/
                     }
                     //endregion
                 }

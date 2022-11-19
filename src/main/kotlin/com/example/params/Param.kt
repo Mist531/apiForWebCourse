@@ -10,3 +10,15 @@ data class UserId(
     val id: UUID,
 )
 
+
+@Serializable
+data class CourseIdModel(
+    @Serializable(with = UUIDSerializer::class)
+    val courseInfoId: UUID,
+)
+
+@Serializable
+data class QuestionIdModel(
+    @Serializable(with = UUIDSerializer::class)
+    val questionInfoId: UUID,
+)

@@ -1,8 +1,9 @@
 package com.example.managers.courseManager.impl
 
+import arrow.fx.coroutines.parTraverse
 import com.example.database.tables.*
 import com.example.managers.courseManager.DeleteCourseManager
-import com.example.models.CourseIdModel
+import com.example.params.CourseIdModel
 import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
@@ -10,17 +11,15 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 class DeleteCourseManagerImpl : DeleteCourseManager {
     override suspend operator fun invoke(param: Unit, request: CourseIdModel): HttpStatusCode =
         newSuspendedTransaction(Dispatchers.IO) {
-            CourseInfo.find {
-                CoursesInfo.id eq request.courseInfoId
-            }.firstOrNull().let { course: CourseInfo? ->
+            CourseInfo.findById(request.courseInfoId).let { course: CourseInfo? ->
                 if (course != null) {
                     QuestionInfo.find {
                         QuestionsInfo.courseInfoId eq request.courseInfoId
-                    }.forEach {
+                    }.parTraverse {
                         AnswerInfo.find {
                             AnswersInfo.questionId eq it.id.value
-                        }.forEach {
-                            it.delete()
+                        }.parTraverse {answer->
+                            answer.delete()
                         }
                         it.delete()
                     }
