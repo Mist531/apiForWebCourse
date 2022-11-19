@@ -1,8 +1,8 @@
 package com.example.documentation.route.user
 
-import com.example.models.GetUserModel
 import com.example.documentation.PutUsersModelTest
 import com.example.documentation.ResponseException
+import com.example.models.GetUserModel
 import io.bkbn.kompendium.core.metadata.GetInfo
 import io.bkbn.kompendium.core.plugin.NotarizedRoute
 import io.ktor.http.*
@@ -11,6 +11,9 @@ import io.ktor.server.routing.*
 
 fun Route.userInfoDocs() {
     install(NotarizedRoute()) {
+        security = mapOf(
+            "basic" to emptyList()
+        )
         get = GetInfo.builder {
             tags("User")
             summary("Получение информации о пользователе")

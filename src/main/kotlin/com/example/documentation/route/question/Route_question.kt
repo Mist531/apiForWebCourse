@@ -15,6 +15,9 @@ import io.ktor.server.routing.*
 
 fun Route.questionDocs() {
     install(NotarizedRoute()) {
+        security = mapOf(
+            "basic" to emptyList()
+        )
         get = GetInfo.builder {
             tags("Question")
             summary("Получение всех вопросов")

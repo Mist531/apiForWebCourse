@@ -18,6 +18,9 @@ import io.ktor.server.routing.*
 
 fun Route.courseDocs() {
     install(NotarizedRoute()) {
+        security = mapOf(
+            "basic" to emptyList()
+        )
         get = GetInfo.builder {
             tags("Course")
             summary("Получение спска курсов")
