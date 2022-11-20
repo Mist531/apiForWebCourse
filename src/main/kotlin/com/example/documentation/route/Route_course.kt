@@ -23,7 +23,7 @@ fun Route.courseDocs() {
         )
         get = GetInfo.builder {
             tags("Course")
-            summary("Получение спска курсов")
+            summary("Получение спска всех курсов")
             description(
                 "Возвращает список курсов. "
             )

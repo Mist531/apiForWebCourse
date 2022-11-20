@@ -1,5 +1,6 @@
 package com.example
 
+import arrow.fx.coroutines.parTraverse
 import com.example.authorization.AuthUtil
 import com.example.authorization.models.TokensModel
 import com.example.configure.configure
@@ -33,7 +34,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.koin.ktor.ext.inject
 import java.util.*
@@ -44,23 +44,60 @@ fun main() {
     val user = System.getenv("DB_USER") ?: "postgres"
     val port = System.getenv("PORT")?.toInt() ?: 8080
     val host = System.getenv("HOST") ?: "0.0.0.0"
-    val admin = System.getenv("ADMIN") ?: "admin"
-    var adminId = UUID.randomUUID()
+    val adminName = "admin"
+
+    val adminId = UUID.fromString("404c889c-c9ef-457d-880a-9f649a2768fd")
+    val listDefaultUUIDCoure = listOf<UUID>(
+        UUID.fromString("904fa590-68f1-11ed-9022-0242ac120002"),
+        UUID.fromString("5feb7899-437a-4be0-9bd9-fb0420c44ae3"),
+        UUID.fromString("c8acdcf0-68f1-11ed-9022-0242ac120002")
+    )
+
     Database.connect(url, "org.postgresql.Driver", user, pass)
     CoroutineScope(Dispatchers.IO).launch {
         newSuspendedTransaction(Dispatchers.IO) {
             SchemaUtils.createMissingTablesAndColumns(
                 AnswersInfo, QuestionsInfo, CoursesInfo, Users
             )
-            if (User.find { Users.login eq admin }.firstOrNull() == null) {
+            if (User.findById(adminId) == null) {
                 User.new {
-                    this.login = admin
-                    this.password = admin
-                    this.firstName = admin
-                    this.lastName = admin
+                    this.id._value = adminId
+                    this.login = adminName
+                    this.password = adminName
+                    this.firstName = adminName
+                    this.lastName = adminName
                 }
             }
-            adminId = User.find { Users.login eq admin and(Users.password eq admin) }.firstOrNull()?.id?.value
+            listDefaultUUIDCoure.parTraverse {uuid->
+                if (CourseInfo.findById(uuid) == null) {
+                    CourseInfo.new {
+                        this.id._value = uuid
+                        this.name = "Курс $uuid"
+                        this.description = "Описание курса $uuid"
+                    }.also { courseInfo ->
+                        for (i in 1..3) {
+                            val rightId = UUID.randomUUID()
+                            QuestionInfo.new {
+                                this.courseInfoId = courseInfo
+                                this.question = "Вопрос $i"
+                                this.rightAnswerId = rightId
+                            }.also { questionId ->
+                                AnswerInfo.new {
+                                    this.id._value = rightId
+                                    this.answer = "Ответ 1"
+                                    this.questionInfoId = questionId
+                                }
+                                for (j in 2..(2..5).random()) {
+                                    AnswerInfo.new {
+                                        this.questionInfoId = questionId
+                                        this.answer = "Ответ $j"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     embeddedServer(
@@ -108,9 +145,10 @@ fun main() {
                         route("info") {
                             userInfoDocs()
                             get {
-                                call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                    call.respond(userManager.getUser(UserId(UUID.fromString(id))))
-                                } ?: call.respond(HttpStatusCode.Unauthorized)
+                                call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()
+                                    ?.let { id ->
+                                        call.respond(userManager.getUser(UserId(UUID.fromString(id))))
+                                    } ?: call.respond(HttpStatusCode.Unauthorized)
                             }
                         }
                         route("refresh") {
@@ -135,7 +173,7 @@ fun main() {
                         courseDocs()
                         post {
                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if(adminId.toString() == id) {
+                                if (adminId.toString() == id) {
                                     call.respond(courseManager.createCourse(call.receive()))
                                 } else {
                                     call.respond(HttpStatusCode.Unauthorized)
@@ -143,13 +181,13 @@ fun main() {
                             } ?: call.respond(HttpStatusCode.Unauthorized)
                         }
                         get {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
                                 call.respond(courseManager.getAllCourse())
                             } ?: call.respond(HttpStatusCode.Unauthorized)
                         }
                         delete {
                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if(adminId.toString() == id) {
+                                if (adminId.toString() == id) {
                                     call.respond(courseManager.deleteCourse(call.receive()))
                                 } else {
                                     call.respond(HttpStatusCode.Unauthorized)
@@ -158,7 +196,7 @@ fun main() {
                         }
                         put {
                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if(adminId.toString() == id) {
+                                if (adminId.toString() == id) {
                                     call.respond(courseManager.updateCourse(call.receive()))
                                 } else {
                                     call.respond(HttpStatusCode.Unauthorized)
@@ -169,40 +207,40 @@ fun main() {
                     //endregion
 
                     //region Question
-                    route("question"){
+                    route("question") {
                         questionDocs()
-                         post {
-                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                 if(adminId.toString() == id) {
-                                     call.respond(questionManager.addQuestion(call.receive()))
-                                 } else {
-                                     call.respond(HttpStatusCode.Unauthorized)
-                                 }
-                             } ?: call.respond(HttpStatusCode.Unauthorized)
-                         }
-                        get {
+                        post {
                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                if (adminId.toString() == id) {
+                                    call.respond(questionManager.addQuestion(call.receive()))
+                                } else {
+                                    call.respond(HttpStatusCode.Unauthorized)
+                                }
+                            } ?: call.respond(HttpStatusCode.Unauthorized)
+                        }
+                        get {
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
                                 call.respond(questionManager.getAllQuestion(call.receive()))
                             } ?: call.respond(HttpStatusCode.Unauthorized)
                         }
-                         delete {
-                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                 if(adminId.toString() == id) {
-                                     call.respond(questionManager.deleteQuestion(call.receive()))
-                                 } else {
-                                     call.respond(HttpStatusCode.Unauthorized)
-                                 }
-                             } ?: call.respond(HttpStatusCode.Unauthorized)
-                         }
-                         /*put {
-                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                 if(adminId.toString() == id) {
-                                     call.respond(questionManager.updateQuestion(call.receive()))
-                                 } else {
-                                     call.respond(HttpStatusCode.Unauthorized)
-                                 }
-                             } ?: call.respond(HttpStatusCode.Unauthorized)
-                         }*/
+                        delete {
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                if (adminId.toString() == id) {
+                                    call.respond(questionManager.deleteQuestion(call.receive()))
+                                } else {
+                                    call.respond(HttpStatusCode.Unauthorized)
+                                }
+                            } ?: call.respond(HttpStatusCode.Unauthorized)
+                        }
+                        /*put {
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                                if(adminId.toString() == id) {
+                                    call.respond(questionManager.updateQuestion(call.receive()))
+                                } else {
+                                    call.respond(HttpStatusCode.Unauthorized)
+                                }
+                            } ?: call.respond(HttpStatusCode.Unauthorized)
+                        }*/
                     }
                     //endregion
                 }

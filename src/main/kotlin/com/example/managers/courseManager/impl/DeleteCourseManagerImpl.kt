@@ -17,7 +17,7 @@ class DeleteCourseManagerImpl : DeleteCourseManager {
                         QuestionsInfo.courseInfoId eq request.courseInfoId
                     }.parTraverse {
                         AnswerInfo.find {
-                            AnswersInfo.questionId eq it.id.value
+                            AnswersInfo.questionInfoId eq it.id.value
                         }.parTraverse {answer->
                             answer.delete()
                         }

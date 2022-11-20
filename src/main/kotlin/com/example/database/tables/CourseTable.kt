@@ -7,8 +7,8 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 import java.util.*
 
 object CoursesInfo : UUIDTable("CourseInfo", "courseInfoId") {
-    val name = varchar("name", 50)
-    val description = varchar("description", 100).nullable()
+    val name = text("name")
+    val description = text("description").nullable()
 }
 
 class CourseInfo(id: EntityID<UUID>) : UUIDEntity(id) {

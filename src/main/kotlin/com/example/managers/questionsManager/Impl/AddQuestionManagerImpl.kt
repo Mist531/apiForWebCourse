@@ -27,7 +27,7 @@ class AddQuestionManagerImpl: AddQuestionManager {
                     request.listAnswer.parTraverse {answerInfo->
                         AnswerInfo.new {
                             answer = answerInfo.answer
-                            questionId = question
+                            questionInfoId = question
                         }.let {
                             if (answerInfo.index == request.rightIndex) {
                                 //maybe throw exception

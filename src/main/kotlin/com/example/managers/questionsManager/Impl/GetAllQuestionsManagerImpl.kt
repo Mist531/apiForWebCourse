@@ -28,12 +28,12 @@ class GetAllQuestionsManagerImpl : GetAllQuestionsManager {
                             courseInfoId = question.courseInfoId.id.value,
                             rightAnswerId = question.rightAnswerId,
                             listAnswer = AnswerInfo.find {
-                                AnswersInfo.questionId eq question.id.value
+                                AnswersInfo.questionInfoId eq question.id.value
                             }.parTraverse { answer ->
                                 AnswerModel(
                                     answerInfoId = answer.id.value,
                                     answer = answer.answer,
-                                    questionInfoId = answer.questionId.id.value
+                                    questionInfoId = answer.questionInfoId.id.value
                                 )
                             }
                         )

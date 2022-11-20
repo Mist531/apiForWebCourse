@@ -7,7 +7,7 @@ import org.jetbrains.exposed.dao.id.UUIDTable
 import java.util.*
 
 object QuestionsInfo: UUIDTable("QuestionInfo", "questionInfoId")  {
-    val question = varchar("question", 50)
+    val question = text("question")
     val courseInfoId = reference("courseInfoId", CoursesInfo)
     val rightAnswerId = uuid("rightAnswerId")
 }

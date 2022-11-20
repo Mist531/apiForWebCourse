@@ -19,7 +19,7 @@ class DeleteQuestionManagerImpl: DeleteQuestionManager {
             }.firstOrNull() ?: throw Exception("Вопрос не найден")
             question.id.value.let { questionId->
                 AnswerInfo.find {
-                    AnswersInfo.questionId eq questionId
+                    AnswersInfo.questionInfoId eq questionId
                 }.parTraverse {
                     it.delete()
                 }
