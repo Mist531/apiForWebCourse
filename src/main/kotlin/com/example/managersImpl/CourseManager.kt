@@ -1,12 +1,7 @@
 package com.example.managersImpl
 
-import com.example.managers.courseManager.CreateCourseManager
-import com.example.managers.courseManager.DeleteCourseManager
-import com.example.managers.courseManager.GetAllCourseManager
-import com.example.managers.courseManager.UpdateCourseManager
-import com.example.models.CourseModel
-import com.example.models.CreateCourseModel
-import com.example.models.PutCourseModel
+import com.example.managers.courseManager.*
+import com.example.models.*
 import com.example.params.CourseIdModel
 import io.ktor.http.*
 import org.koin.core.component.KoinComponent
@@ -20,6 +15,7 @@ interface CourseManager {
     suspend fun deleteCourse(courseId: CourseIdModel): HttpStatusCode
 
     suspend fun updateCourse(course: PutCourseModel): HttpStatusCode
+    suspend fun checkCourse(checkCourse: CheckCourseModel): ResultCourseModel
 }
 
 class CourseManagerImpl : CourseManager, KoinComponent {
@@ -57,6 +53,16 @@ class CourseManagerImpl : CourseManager, KoinComponent {
         val manager: UpdateCourseManager by inject()
         return runCatching {
             manager.invoke(Unit,course)
+        }.getOrElse {
+            it.printStackTrace()
+            throw it
+        }
+    }
+
+    override suspend fun checkCourse(checkCourse: CheckCourseModel): ResultCourseModel {
+        val manager: CheckCourseManager by inject()
+        return runCatching {
+            manager.invoke(Unit,checkCourse)
         }.getOrElse {
             it.printStackTrace()
             throw it

@@ -1,13 +1,7 @@
 package com.example.modules
 
-import com.example.managers.courseManager.CreateCourseManager
-import com.example.managers.courseManager.DeleteCourseManager
-import com.example.managers.courseManager.GetAllCourseManager
-import com.example.managers.courseManager.UpdateCourseManager
-import com.example.managers.courseManager.impl.CreateCourseManagerImpl
-import com.example.managers.courseManager.impl.DeleteCourseManagerImpl
-import com.example.managers.courseManager.impl.GetAllCourseManagerImpl
-import com.example.managers.courseManager.impl.UpdateCourseManagerImpl
+import com.example.managers.courseManager.*
+import com.example.managers.courseManager.impl.*
 import com.example.managers.questionsManager.AddQuestionManager
 import com.example.managers.questionsManager.DeleteQuestionManager
 import com.example.managers.questionsManager.GetAllQuestionsManager
@@ -49,6 +43,9 @@ val managerModule = module {
     }
     singleOf(::UpdateCourseManagerImpl){
         bind<UpdateCourseManager>()
+    }
+    singleOf(::CheckCourseManagerImpl){
+        bind<CheckCourseManager>()
     }
     //endregion
 

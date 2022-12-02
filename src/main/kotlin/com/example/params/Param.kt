@@ -10,7 +10,6 @@ data class UserId(
     val id: UUID,
 )
 
-
 @Serializable
 data class CourseIdModel(
     @Serializable(with = UUIDSerializer::class)

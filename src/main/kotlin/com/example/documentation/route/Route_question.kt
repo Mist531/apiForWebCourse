@@ -1,4 +1,4 @@
-package com.example.documentation.route.question
+package com.example.documentation.route
 
 import com.example.documentation.AddQuestionsInfoModelTest
 import com.example.documentation.GetAllQuestionsModelTest
@@ -61,9 +61,9 @@ fun Route.questionDocs() {
                 responseCode(HttpStatusCode.BadRequest)
                 description("Вопрос не добавлен")
                 examples(
-                    "Пример" to ResponseException("Курс не найден"),
-                    "Пример" to ResponseException("Правильный ответ не найден"),
-                    "Пример" to ResponseException("Вопрос уже существует")
+                    "Пример 1" to ResponseException("Курс не найден"),
+                    "Пример 2" to ResponseException("Правильный ответ не найден"),
+                    "Пример 3" to ResponseException("Вопрос уже существует")
                 )
             }
         }

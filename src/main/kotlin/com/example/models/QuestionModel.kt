@@ -4,7 +4,7 @@ import com.example.database.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.*
 
-@Serializable
+/*@Serializable
 data class QuestionModel(
     @Serializable(with = UUIDSerializer::class)
     val questionInfoId: UUID,
@@ -13,7 +13,7 @@ data class QuestionModel(
     val courseInfoId:UUID,
     @Serializable(with = UUIDSerializer::class)
     val rightAnswerId:UUID
-)
+)*/
 
 /*@Serializable
 data class QuestionsInfoIdModel(

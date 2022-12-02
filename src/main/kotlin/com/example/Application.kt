@@ -5,9 +5,10 @@ import com.example.authorization.AuthUtil
 import com.example.authorization.models.TokensModel
 import com.example.configure.configure
 import com.example.database.tables.*
+import com.example.documentation.route.checkCourseDocs
 import com.example.documentation.route.courseDocs
 import com.example.documentation.route.healthcheckDocs
-import com.example.documentation.route.question.questionDocs
+import com.example.documentation.route.questionDocs
 import com.example.documentation.route.user.userInfoDocs
 import com.example.documentation.route.user.userLoginDocs
 import com.example.documentation.route.user.userRefreshDocs
@@ -53,6 +54,8 @@ fun main() {
         UUID.fromString("c8acdcf0-68f1-11ed-9022-0242ac120002")
     )
 
+    //Logger.getLogger("ktor").info(CheckCourseModelTest.)
+
     Database.connect(url, "org.postgresql.Driver", user, pass)
     CoroutineScope(Dispatchers.IO).launch {
         newSuspendedTransaction(Dispatchers.IO) {
@@ -75,7 +78,7 @@ fun main() {
                         this.name = "Курс $uuid"
                         this.description = "Описание курса $uuid"
                     }.also { courseInfo ->
-                        for (i in 1..3) {
+                        for (i in 1..(2..4).random()) {
                             val rightId = UUID.randomUUID()
                             QuestionInfo.new {
                                 this.courseInfoId = courseInfo
@@ -100,151 +103,163 @@ fun main() {
             }
         }
     }
-    embeddedServer(
-        Netty, port = port, host = host,
-    ) {
-        configure(
-            port = port,
-            host = host,
-            listModules = listOf(
-                managerModule, mapperModule, managersImplModule
-            )
-        )
-        val userManager: UserManager by inject()
-        val courseManager: CourseManager by inject()
-        val questionManager: QuestionManager by inject()
-        routing {
-            redoc()
-            route("api") {
+    embeddedServer(Netty, port = port, host = host,
+        module = {
+            myApplicationModule(port = port, host = host, adminId = adminId.toString())
+        }
+    ).start(wait = true)
+}
 
-                //region Main
-                route("healthcheck") {
-                    healthcheckDocs()
-                    get {
-                        call.respond(HttpStatusCode.OK)
-                    }
+fun Application.myApplicationModule(port:Int, host:String, adminId:String) {
+    configure(
+        port = port,
+        host = host,
+        listModules = listOf(
+            managerModule, mapperModule, managersImplModule
+        )
+    )
+    val userManager: UserManager by inject()
+    val courseManager: CourseManager by inject()
+    val questionManager: QuestionManager by inject()
+    routing {
+        redoc()
+        route("api") {
+
+            //region Main
+            route("healthcheck") {
+                healthcheckDocs()
+                get {
+                    call.respond(HttpStatusCode.OK)
                 }
-                route("login") {
-                    userLoginDocs()
-                    post {
-                        call.respond(userManager.login(call.receive()))
-                    }
+            }
+            route("login") {
+                userLoginDocs()
+                post {
+                    call.respond(userManager.login(call.receive()))
                 }
-                route("register") {
-                    userRegisterDocs()
-                    post {
-                        call.respond(userManager.register(call.receive()))
+            }
+            route("register") {
+                userRegisterDocs()
+                post {
+                    call.respond(userManager.register(call.receive()))
+                }
+            }
+            //endregion
+
+            authenticate("jwt") {
+
+                //region User
+                route("user") {
+                    route("info") {
+                        userInfoDocs()
+                        get {
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()
+                                ?.let { id ->
+                                    call.respond(userManager.getUser(UserId(UUID.fromString(id))))
+                                } ?: call.respond(HttpStatusCode.Unauthorized)
+                        }
+                    }
+                    route("refresh") {
+                        userRefreshDocs()
+                        get {
+                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()
+                                ?.let { id ->
+                                    call.respond(
+                                        TokensModel(
+                                            access = AuthUtil.buildAccess(id),
+                                            refresh = AuthUtil.buildRefresh(id)
+                                        )
+                                    )
+                                } ?: call.respond(HttpStatusCode.Unauthorized)
+                        }
                     }
                 }
                 //endregion
 
-                authenticate("jwt") {
-
-                    //region User
-                    route("user") {
-                        route("info") {
-                            userInfoDocs()
-                            get {
-                                call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()
-                                    ?.let { id ->
-                                        call.respond(userManager.getUser(UserId(UUID.fromString(id))))
-                                    } ?: call.respond(HttpStatusCode.Unauthorized)
+                //region Course
+                route("course") {
+                    courseDocs()
+                    post {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if (adminId == id) {
+                                call.respond(courseManager.createCourse(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        }
-                        route("refresh") {
-                            userRefreshDocs()
-                            get {
-                                call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()
-                                    ?.let { id ->
-                                        call.respond(
-                                            TokensModel(
-                                                access = AuthUtil.buildAccess(id),
-                                                refresh = AuthUtil.buildRefresh(id)
-                                            )
-                                        )
-                                    } ?: call.respond(HttpStatusCode.Unauthorized)
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    get {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
+                            call.respond(courseManager.getAllCourse())
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    delete {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if (adminId == id) {
+                                call.respond(courseManager.deleteCourse(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
                     }
-                    //endregion
-
-                    //region Course
-                    route("course") {
-                        courseDocs()
+                    put {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if (adminId == id) {
+                                call.respond(courseManager.updateCourse(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
+                            }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    route("check") {
+                        checkCourseDocs()
                         post {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if (adminId.toString() == id) {
-                                    call.respond(courseManager.createCourse(call.receive()))
-                                } else {
-                                    call.respond(HttpStatusCode.Unauthorized)
-                                }
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
-                        }
-                        get {
                             call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
-                                call.respond(courseManager.getAllCourse())
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
-                        }
-                        delete {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if (adminId.toString() == id) {
-                                    call.respond(courseManager.deleteCourse(call.receive()))
-                                } else {
-                                    call.respond(HttpStatusCode.Unauthorized)
-                                }
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
-                        }
-                        put {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if (adminId.toString() == id) {
-                                    call.respond(courseManager.updateCourse(call.receive()))
-                                } else {
-                                    call.respond(HttpStatusCode.Unauthorized)
-                                }
+                                call.respond(courseManager.checkCourse(call.receive()))
                             } ?: call.respond(HttpStatusCode.Unauthorized)
                         }
                     }
-                    //endregion
-
-                    //region Question
-                    route("question") {
-                        questionDocs()
-                        post {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if (adminId.toString() == id) {
-                                    call.respond(questionManager.addQuestion(call.receive()))
-                                } else {
-                                    call.respond(HttpStatusCode.Unauthorized)
-                                }
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
-                        }
-                        get {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
-                                call.respond(questionManager.getAllQuestion(call.receive()))
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
-                        }
-                        delete {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if (adminId.toString() == id) {
-                                    call.respond(questionManager.deleteQuestion(call.receive()))
-                                } else {
-                                    call.respond(HttpStatusCode.Unauthorized)
-                                }
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
-                        }
-                        /*put {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                                if(adminId.toString() == id) {
-                                    call.respond(questionManager.updateQuestion(call.receive()))
-                                } else {
-                                    call.respond(HttpStatusCode.Unauthorized)
-                                }
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
-                        }*/
-                    }
-                    //endregion
                 }
+                //endregion
+
+                //region Question
+                route("question") {
+                    questionDocs()
+                    post {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if (adminId == id) {
+                                call.respond(questionManager.addQuestion(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
+                            }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    get {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
+                            call.respond(questionManager.getAllQuestion(call.receive()))
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    delete {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if (adminId == id) {
+                                call.respond(questionManager.deleteQuestion(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
+                            }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    /*put {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if(adminId.toString() == id) {
+                                call.respond(questionManager.updateQuestion(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
+                            }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }*/
+                }
+                //endregion
             }
         }
-    }.start(wait = true)
+    }
 }

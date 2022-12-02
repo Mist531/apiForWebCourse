@@ -1,9 +1,7 @@
 package com.example.managers.courseManager
 
 import com.example.managers.SimpleManager
-import com.example.models.CourseModel
-import com.example.models.CreateCourseModel
-import com.example.models.PutCourseModel
+import com.example.models.*
 import com.example.params.CourseIdModel
 import io.ktor.http.*
 
@@ -16,3 +14,5 @@ interface CreateCourseManager : CoursesManager<Unit, CreateCourseModel, HttpStat
 interface UpdateCourseManager : CoursesManager<Unit, PutCourseModel, HttpStatusCode>
 
 interface DeleteCourseManager : CoursesManager<Unit, CourseIdModel, HttpStatusCode>
+
+interface CheckCourseManager : CoursesManager<Unit, CheckCourseModel, ResultCourseModel>

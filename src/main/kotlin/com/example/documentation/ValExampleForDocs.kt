@@ -106,3 +106,26 @@ val AddQuestionsInfoModelTest = AddQuestionsInfoModel(
         )
     )
 )
+
+val CheckCourseModelTest = CheckCourseModel(
+    courseInfoId = UUID.randomUUID(),
+    questions = listOf(
+        CheckQuestionModel(
+            questionsInfoId = UUID.randomUUID(),
+            selectAnswerId = UUID.randomUUID()
+        ),
+        CheckQuestionModel(
+            questionsInfoId = UUID.randomUUID(),
+            selectAnswerId = UUID.randomUUID()
+        ),
+        CheckQuestionModel(
+            questionsInfoId = UUID.randomUUID(),
+            selectAnswerId = UUID.randomUUID()
+        ),
+        CheckQuestionModel(
+            questionsInfoId = UUID.randomUUID(),
+            selectAnswerId = UUID.randomUUID()
+        )
+    )
+)
+
