@@ -12,3 +12,27 @@ data class AnswerModel(
     val questionInfoId:UUID,
     val answer:String
 )
+
+@Serializable
+data class PutAnswerModel(
+    @Serializable(with = UUIDSerializer::class)
+    val questionInfoId:UUID,
+    @Serializable(with = UUIDSerializer::class)
+    val answerInfoId: UUID,
+    val answer:String
+)
+
+@Serializable
+data class DeleteAnswerInfoModel(
+    @Serializable(with = UUIDSerializer::class)
+    val questionInfoId:UUID,
+    @Serializable(with = UUIDSerializer::class)
+    val answerInfoId: UUID
+)
+
+@Serializable
+data class PostAnswerModel(
+    @Serializable(with = UUIDSerializer::class)
+    val questionInfoId:UUID,
+    val answer:String
+)

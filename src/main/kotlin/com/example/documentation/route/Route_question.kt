@@ -2,12 +2,15 @@ package com.example.documentation.route
 
 import com.example.documentation.AddQuestionsInfoModelTest
 import com.example.documentation.GetAllQuestionsModelTest
+import com.example.documentation.PutQuestionsInfoModelTest
 import com.example.documentation.ResponseException
 import com.example.models.AddQuestionsInfoModel
+import com.example.models.PutQuestionsInfoModel
 import com.example.models.QuestionsInfoModel
 import io.bkbn.kompendium.core.metadata.DeleteInfo
 import io.bkbn.kompendium.core.metadata.GetInfo
 import io.bkbn.kompendium.core.metadata.PostInfo
+import io.bkbn.kompendium.core.metadata.PutInfo
 import io.bkbn.kompendium.core.plugin.NotarizedRoute
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -40,7 +43,7 @@ fun Route.questionDocs() {
         }
         post = PostInfo.builder {
             tags("Admin Question")
-            summary("Добавление вопроса")
+            summary("Добавление вопросов к курсу")
             description(
                 "Доступно только администратору. Добавляет вопрос к курсу"
             )
@@ -85,6 +88,37 @@ fun Route.questionDocs() {
                 description("Вопрос не удален")
                 examples(
                     "Пример" to ResponseException("Вопрос не найден")
+                )
+            }
+        }
+        put = PutInfo.builder {
+            tags("Admin Question")
+            summary("Изменение вопроса в курсе")
+            description(
+                "Доступно только администратору."
+            )
+            request {
+                requestType<PutQuestionsInfoModel>()
+                description("Модель запроса")
+                examples(
+                    "Пример" to PutQuestionsInfoModelTest
+                )
+            }
+            response {
+                responseType<HttpStatusCode>()
+                responseCode(HttpStatusCode.OK)
+                description("Вопрос изменен")
+            }
+            canRespond {
+                responseType<ResponseException>()
+                responseCode(HttpStatusCode.BadRequest)
+                description("Вопрос не изменен")
+                examples(
+                    "Пример 1" to ResponseException("Вопрос не найден"),
+                    "Пример 2" to ResponseException("Правильный ответ не найден"),
+                    "Пример 3" to ResponseException("Такой ответ уже существует"),
+                    "Пример 4" to ResponseException("Курс не найден"),
+                    "Пример 5" to ResponseException("Такой вопрос уже существует")
                 )
             }
         }

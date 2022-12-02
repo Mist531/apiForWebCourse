@@ -8,4 +8,5 @@ val managersImplModule = module {
     singleOf<UserManager>(::UserManagerImpl)
     singleOf<CourseManager>(::CourseManagerImpl)
     singleOf<QuestionManager>(::QuestionManagerImpl)
+    singleOf<AnswerManager>(::AnswerManagerImpl)
 }

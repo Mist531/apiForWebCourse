@@ -1,5 +1,11 @@
 package com.example.modules
 
+import com.example.managers.answerManager.DeleteAnswersManager
+import com.example.managers.answerManager.Impl.DeleteAnswersManagerImpl
+import com.example.managers.answerManager.Impl.PostAnswersManagerImpl
+import com.example.managers.answerManager.Impl.PutAnswersManagerImpl
+import com.example.managers.answerManager.PostAnswersManager
+import com.example.managers.answerManager.PutAnswersManager
 import com.example.managers.courseManager.*
 import com.example.managers.courseManager.impl.*
 import com.example.managers.questionsManager.AddQuestionManager
@@ -8,6 +14,8 @@ import com.example.managers.questionsManager.GetAllQuestionsManager
 import com.example.managers.questionsManager.Impl.AddQuestionManagerImpl
 import com.example.managers.questionsManager.Impl.DeleteQuestionManagerImpl
 import com.example.managers.questionsManager.Impl.GetAllQuestionsManagerImpl
+import com.example.managers.questionsManager.Impl.PutQuestionManagerImpl
+import com.example.managers.questionsManager.PutQuestionManager
 import com.example.managers.usersManager.GetUserManager
 import com.example.managers.usersManager.LoginUserManager
 import com.example.managers.usersManager.RegisterUserManager
@@ -58,6 +66,21 @@ val managerModule = module {
     }
     singleOf(::DeleteQuestionManagerImpl){
         bind<DeleteQuestionManager>()
+    }
+    singleOf(::PutQuestionManagerImpl){
+        bind<PutQuestionManager>()
+    }
+    //endregion
+
+    //region Answer
+    singleOf(::PutAnswersManagerImpl){
+        bind<PutAnswersManager>()
+    }
+    singleOf(::PostAnswersManagerImpl){
+        bind<PostAnswersManager>()
+    }
+    singleOf(::DeleteAnswersManagerImpl){
+        bind<DeleteAnswersManager>()
     }
     //endregion
 }

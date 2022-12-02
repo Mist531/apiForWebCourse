@@ -30,25 +30,44 @@ data class GetAllQuestionsModel(
 data class QuestionsInfoModel(
     @Serializable(with = UUIDSerializer::class)
     val questionInfoId: UUID,
-    val question:String,
+    val question: String,
     @Serializable(with = UUIDSerializer::class)
-    val courseInfoId:UUID,
+    val courseInfoId: UUID,
     @Serializable(with = UUIDSerializer::class)
-    val rightAnswerId:UUID,
+    val rightAnswerId: UUID,
     val listAnswer: List<AnswerModel>
 )
 
 @Serializable
 data class AddQuestionsInfoModel(
-    val question:String,
+    val question: String,
     @Serializable(with = UUIDSerializer::class)
-    val courseInfoId:UUID,
-    val rightIndex:Int,
+    val courseInfoId: UUID,
+    val rightIndex: Int,
     val listAnswer: List<AddAnswerModel>
 )
 
 @Serializable
 data class AddAnswerModel(
     val index: Int,
-    val answer:String
+    val answer: String
+)
+
+@Serializable
+data class PutQuestionsInfoModel(
+    @Serializable(with = UUIDSerializer::class)
+    val questionInfoId: UUID,
+    val question: String,
+    @Serializable(with = UUIDSerializer::class)
+    val courseInfoId: UUID,
+    @Serializable(with = UUIDSerializer::class)
+    val rightAnswerId: UUID,
+    val listAnswer: List<PutAnswersModels>
+)
+
+@Serializable
+data class PutAnswersModels(
+    @Serializable(with = UUIDSerializer::class)
+    val answerId: UUID,
+    val answer: String
 )

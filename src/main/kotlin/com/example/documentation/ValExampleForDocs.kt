@@ -129,3 +129,38 @@ val CheckCourseModelTest = CheckCourseModel(
     )
 )
 
+val PostAnswerModelTest = PostAnswerModel(
+    questionInfoId = UUID.randomUUID(),
+    answer = "Ответ 1"
+)
+
+val PutAnswerModelTest = PutAnswerModel(
+    questionInfoId = UUID.randomUUID(),
+    answerInfoId = UUID.randomUUID(),
+    answer = "Ответ 1"
+)
+
+val PutQuestionsInfoModelTest = PutQuestionsInfoModel(
+    questionInfoId = UUID.randomUUID(),
+    question = "Вопрос 1",
+    courseInfoId = UUID.randomUUID(),
+    rightAnswerId = examplUUID,
+    listAnswer = listOf(
+        PutAnswersModels(
+            answerId = examplUUID,
+            answer = "Ответ 1"
+        ),
+        PutAnswersModels(
+            answerId = UUID.randomUUID(),
+            answer = "Ответ 2"
+        ),
+        PutAnswersModels(
+            answerId = UUID.randomUUID(),
+            answer = "Ответ 3"
+        ),
+        PutAnswersModels(
+            answerId = UUID.randomUUID(),
+            answer = "Ответ 4"
+        )
+    )
+)

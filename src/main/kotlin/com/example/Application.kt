@@ -5,14 +5,12 @@ import com.example.authorization.AuthUtil
 import com.example.authorization.models.TokensModel
 import com.example.configure.configure
 import com.example.database.tables.*
-import com.example.documentation.route.checkCourseDocs
-import com.example.documentation.route.courseDocs
-import com.example.documentation.route.healthcheckDocs
-import com.example.documentation.route.questionDocs
+import com.example.documentation.route.*
 import com.example.documentation.route.user.userInfoDocs
 import com.example.documentation.route.user.userLoginDocs
 import com.example.documentation.route.user.userRefreshDocs
 import com.example.documentation.route.user.userRegisterDocs
+import com.example.managersImpl.AnswerManager
 import com.example.managersImpl.CourseManager
 import com.example.managersImpl.QuestionManager
 import com.example.managersImpl.UserManager
@@ -121,6 +119,7 @@ fun Application.myApplicationModule(port:Int, host:String, adminId:String) {
     val userManager: UserManager by inject()
     val courseManager: CourseManager by inject()
     val questionManager: QuestionManager by inject()
+    val answerManager: AnswerManager by inject()
     routing {
         redoc()
         route("api") {
@@ -248,15 +247,48 @@ fun Application.myApplicationModule(port:Int, host:String, adminId:String) {
                             }
                         } ?: call.respond(HttpStatusCode.Unauthorized)
                     }
-                    /*put {
+                    put {
                         call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if(adminId.toString() == id) {
-                                call.respond(questionManager.updateQuestion(call.receive()))
+                            if(adminId == id) {
+                                call.respond(questionManager.putQuestion(call.receive()))
                             } else {
                                 call.respond(HttpStatusCode.Unauthorized)
                             }
                         } ?: call.respond(HttpStatusCode.Unauthorized)
-                    }*/
+                    }
+                }
+                //endregion
+
+                //reginon Answer
+                route("answer"){
+                    answerDocs()
+                    post {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {id->
+                            if (adminId == id) {
+                                call.respond(answerManager.postAnswer(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
+                            }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    delete {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if (adminId == id) {
+                                call.respond(answerManager.deleteAnswer(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
+                            }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                    put {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
+                            if (adminId == id) {
+                                call.respond(answerManager.putAnswer(call.receive()))
+                            } else {
+                                call.respond(HttpStatusCode.Unauthorized)
+                            }
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
                 }
                 //endregion
             }

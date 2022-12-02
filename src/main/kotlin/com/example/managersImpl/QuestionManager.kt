@@ -3,7 +3,9 @@ package com.example.managersImpl
 import com.example.managers.questionsManager.AddQuestionManager
 import com.example.managers.questionsManager.DeleteQuestionManager
 import com.example.managers.questionsManager.GetAllQuestionsManager
+import com.example.managers.questionsManager.PutQuestionManager
 import com.example.models.AddQuestionsInfoModel
+import com.example.models.PutQuestionsInfoModel
 import com.example.models.QuestionsInfoModel
 import com.example.params.CourseIdModel
 import com.example.params.QuestionIdModel
@@ -17,6 +19,8 @@ interface QuestionManager {
     suspend fun addQuestion(question: AddQuestionsInfoModel): HttpStatusCode
 
     suspend fun deleteQuestion(questionId: QuestionIdModel): HttpStatusCode
+
+    suspend fun putQuestion(question: PutQuestionsInfoModel): HttpStatusCode
 }
 
 class QuestionManagerImpl : QuestionManager, KoinComponent {
@@ -44,6 +48,16 @@ class QuestionManagerImpl : QuestionManager, KoinComponent {
         val manager: DeleteQuestionManager by inject()
         return runCatching {
             manager.invoke(Unit, questionId)
+        }.getOrElse {
+            it.printStackTrace()
+            throw it
+        }
+    }
+
+    override suspend fun putQuestion(question: PutQuestionsInfoModel): HttpStatusCode {
+        val manager: PutQuestionManager by inject()
+        return runCatching {
+            manager.invoke(Unit, question)
         }.getOrElse {
             it.printStackTrace()
             throw it
