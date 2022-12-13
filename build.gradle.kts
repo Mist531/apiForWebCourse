@@ -70,13 +70,9 @@ dependencies {
     implementation("io.insert-koin:koin-logger-slf4j:$koinVersion")
 
     //bd
-    implementation("org.postgresql:postgresql:42.5.0")
+    implementation("org.postgresql:postgresql:42.5.1")
 
     //arrow
     implementation("io.arrow-kt:arrow-fx-coroutines:1.1.2")
 
-/*    //Client Http
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-cio:$ktorVersion")
-    implementation("io.ktor:ktor-client-serialization:$ktorVersion")*/
 }

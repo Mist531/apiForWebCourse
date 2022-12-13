@@ -41,7 +41,7 @@ fun main() {
     val url = System.getenv("DB_URL") ?: "jdbc:postgresql://db.fhshwyorwexsjojuohkx.supabase.co:5432/postgres"
     val pass = System.getenv("DB_PASS") ?: "UBhfHX9s6hT@Vty"
     val user = System.getenv("DB_USER") ?: "postgres"
-    val port = System.getenv("PORT")?.toInt() ?: 8080
+    val port = System.getenv("PORT")?.toInt() ?: 8081
     val host = System.getenv("HOST") ?: "0.0.0.0"
     val adminName = "admin"
 
@@ -51,8 +51,6 @@ fun main() {
         UUID.fromString("5feb7899-437a-4be0-9bd9-fb0420c44ae3"),
         UUID.fromString("c8acdcf0-68f1-11ed-9022-0242ac120002")
     )
-
-    //Logger.getLogger("ktor").info(CheckCourseModelTest.)
 
     Database.connect(url, "org.postgresql.Driver", user, pass)
     CoroutineScope(Dispatchers.IO).launch {
