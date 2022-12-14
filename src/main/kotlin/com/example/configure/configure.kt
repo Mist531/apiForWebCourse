@@ -12,10 +12,7 @@ fun Application.configure(
         listModules
     )
     configureLogging()
-    configureHTTP(
-        host = host,
-        port = port,
-    )
+    configureHTTP()
     configureAuthentication()
     configureRouting()
     configureSerialization()

@@ -5,6 +5,7 @@ import com.example.authorization.AuthUtil
 import com.example.authorization.models.TokensModel
 import com.example.configure.configure
 import com.example.database.tables.*
+import com.example.documentation.getQuestionDocs
 import com.example.documentation.route.*
 import com.example.documentation.route.user.userInfoDocs
 import com.example.documentation.route.user.userLoginDocs
@@ -67,7 +68,7 @@ fun main() {
                     this.lastName = adminName
                 }
             }
-            listDefaultUUIDCoure.parTraverse {uuid->
+            listDefaultUUIDCoure.parTraverse { uuid ->
                 if (CourseInfo.findById(uuid) == null) {
                     CourseInfo.new {
                         this.id._value = uuid
@@ -106,7 +107,7 @@ fun main() {
     ).start(wait = true)
 }
 
-fun Application.myApplicationModule(port:Int, host:String, adminId:String) {
+fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
     configure(
         port = port,
         host = host,
@@ -220,6 +221,14 @@ fun Application.myApplicationModule(port:Int, host:String, adminId:String) {
                 //endregion
 
                 //region Question
+                route("getQuestion") {
+                    getQuestionDocs()
+                    post {
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
+                            call.respond(questionManager.getAllQuestion(call.receive()))
+                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                    }
+                }
                 route("question") {
                     questionDocs()
                     post {
@@ -247,7 +256,7 @@ fun Application.myApplicationModule(port:Int, host:String, adminId:String) {
                     }
                     put {
                         call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if(adminId == id) {
+                            if (adminId == id) {
                                 call.respond(questionManager.putQuestion(call.receive()))
                             } else {
                                 call.respond(HttpStatusCode.Unauthorized)
@@ -258,10 +267,10 @@ fun Application.myApplicationModule(port:Int, host:String, adminId:String) {
                 //endregion
 
                 //reginon Answer
-                route("answer"){
+                route("answer") {
                     answerDocs()
                     post {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {id->
+                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
                             if (adminId == id) {
                                 call.respond(answerManager.postAnswer(call.receive()))
                             } else {

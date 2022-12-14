@@ -4,9 +4,8 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.plugins.cors.routing.*
 
-fun Application.configureHTTP(host:String, port:Int) {
+fun Application.configureHTTP() {
     install(CORS) {
-        //allowHost("$host:$port", schemes = listOf("http", "https"))
         anyHost()
         allowHeader(HttpHeaders.ContentType)
         allowHeader(HttpHeaders.Authorization)
