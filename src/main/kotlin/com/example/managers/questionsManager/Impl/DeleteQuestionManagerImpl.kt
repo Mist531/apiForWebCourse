@@ -1,10 +1,7 @@
 package com.example.managers.questionsManager.Impl
 
 import arrow.fx.coroutines.parTraverse
-import com.example.database.tables.AnswerInfo
-import com.example.database.tables.AnswersInfo
-import com.example.database.tables.QuestionInfo
-import com.example.database.tables.QuestionsInfo
+import com.example.database.tables.*
 import com.example.managers.questionsManager.DeleteQuestionManager
 import com.example.params.QuestionIdModel
 import io.ktor.http.*
@@ -17,6 +14,13 @@ class DeleteQuestionManagerImpl : DeleteQuestionManager {
             val question = QuestionInfo.find {
                 QuestionsInfo.id eq request.questionInfoId
             }.firstOrNull() ?: throw Exception("Вопрос не найден")
+            QuestionInfo.find {
+                CoursesInfo.id eq question.courseInfoId.id
+            }.count().let {
+                if (it == 1L) {
+                    throw Exception("Нельзя удалить последний вопрос")
+                }
+            }
             question.id.value.let { questionId ->
                 AnswerInfo.find {
                     AnswersInfo.questionInfoId eq questionId

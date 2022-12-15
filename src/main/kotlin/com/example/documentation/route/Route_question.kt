@@ -28,7 +28,7 @@ fun Route.questionDocs() {
             tags("Question")
             parameters(
                 Parameter(
-                    name = "courseInfoId",
+                    name = "questionInfoId",
                     `in` = Parameter.Location.path,
                     schema = TypeDefinition.UUID,
                     allowEmptyValue = false,
@@ -91,7 +91,7 @@ fun Route.questionDocs() {
             tags("Admin Question")
             parameters(
                 Parameter(
-                    name = "courseInfoId",
+                    name = "questionInfoId",
                     `in` = Parameter.Location.path,
                     schema = TypeDefinition.UUID,
                     allowEmptyValue = false,
