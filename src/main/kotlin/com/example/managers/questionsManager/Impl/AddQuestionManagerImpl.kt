@@ -11,20 +11,20 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-class AddQuestionManagerImpl: AddQuestionManager {
+class AddQuestionManagerImpl : AddQuestionManager {
     override suspend fun invoke(param: Unit, request: AddQuestionsInfoModel): HttpStatusCode =
         newSuspendedTransaction(Dispatchers.IO) {
             val findAnswer = QuestionInfo.find {
                 QuestionsInfo.question eq request.question
             }.firstOrNull()
-            if(findAnswer == null){
+            if (findAnswer == null) {
                 QuestionInfo.new {
                     question = request.question
                     courseInfoId = CourseInfo.findById(request.courseInfoId) ?: throw Exception("Курс не найден")
                     /*rightAnswerId = request.rightAnswerId*/
-                }.let {question->
+                }.let { question ->
                     var boolean = false
-                    request.listAnswer.parTraverse {answerInfo->
+                    request.listAnswer.parTraverse { answerInfo ->
                         AnswerInfo.new {
                             answer = answerInfo.answer
                             questionInfoId = question
@@ -36,13 +36,13 @@ class AddQuestionManagerImpl: AddQuestionManager {
                             }
                         }
                     }.let {
-                        if(!boolean){
+                        if (!boolean) {
                             throw Exception("Правильный ответ не найден")
                         }
                     }
                 }
                 HttpStatusCode.OK
-            }else{
+            } else {
                 throw Exception("Вопрос уже существует")
             }
         }

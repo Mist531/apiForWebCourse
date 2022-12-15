@@ -8,9 +8,9 @@ import com.example.params.CourseIdModel
 import com.example.params.QuestionIdModel
 import io.ktor.http.*
 
-interface QuestionsManager <Param, Request, Response> : SimpleManager<Param, Request, Response>
+interface QuestionsManager<Param, Request, Response> : SimpleManager<Param, Request, Response>
 
-interface GetAllQuestionsManager : QuestionsManager<CourseIdModel, Unit,  List<QuestionsInfoModel>>
+interface GetAllQuestionsManager : QuestionsManager<CourseIdModel, Unit, List<QuestionsInfoModel>>
 
 interface AddQuestionManager : QuestionsManager<Unit, AddQuestionsInfoModel, HttpStatusCode>
 

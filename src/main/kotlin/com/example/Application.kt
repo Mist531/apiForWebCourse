@@ -1,6 +1,5 @@
 package com.example
 
-import arrow.fx.coroutines.parTraverse
 import com.example.authorization.AuthUtil
 import com.example.authorization.models.TokensModel
 import com.example.configure.configure
@@ -15,9 +14,13 @@ import com.example.managersImpl.AnswerManager
 import com.example.managersImpl.CourseManager
 import com.example.managersImpl.QuestionManager
 import com.example.managersImpl.UserManager
+import com.example.models.DeleteAnswerInfoModel
 import com.example.modules.managerModule
 import com.example.modules.managersImplModule
 import com.example.modules.mapperModule
+import com.example.params.CourseIdModel
+import com.example.params.Param
+import com.example.params.QuestionIdModel
 import com.example.params.UserId
 import io.bkbn.kompendium.core.routes.redoc
 import io.ktor.http.*
@@ -27,6 +30,7 @@ import io.ktor.server.auth.jwt.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.request.*
+import io.ktor.server.resources.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +54,9 @@ fun main() {
     val listDefaultUUIDCoure = listOf<UUID>(
         UUID.fromString("904fa590-68f1-11ed-9022-0242ac120002"),
         UUID.fromString("5feb7899-437a-4be0-9bd9-fb0420c44ae3"),
-        UUID.fromString("c8acdcf0-68f1-11ed-9022-0242ac120002")
+        UUID.fromString("c8acdcf0-68f1-11ed-9022-0242ac120002"),
+        UUID.fromString("d0b0b4f0-68f1-11ed-9022-0242ac120002"),
+        UUID.fromString("d8b3e1f0-68f1-11ed-9022-0242ac120002"),
     )
 
     Database.connect(url, "org.postgresql.Driver", user, pass)
@@ -68,29 +74,31 @@ fun main() {
                     this.lastName = adminName
                 }
             }
-            listDefaultUUIDCoure.parTraverse { uuid ->
+            listDefaultUUIDCoure.forEach { uuid ->
                 if (CourseInfo.findById(uuid) == null) {
                     CourseInfo.new {
                         this.id._value = uuid
                         this.name = "Курс $uuid"
                         this.description = "Описание курса $uuid"
                     }.also { courseInfo ->
-                        for (i in 1..(2..4).random()) {
+                        for (i in 1..(4..7).random()) {
                             val rightId = UUID.randomUUID()
                             QuestionInfo.new {
                                 this.courseInfoId = courseInfo
                                 this.question = "Вопрос $i"
                                 this.rightAnswerId = rightId
                             }.also { questionId ->
-                                AnswerInfo.new {
-                                    this.id._value = rightId
-                                    this.answer = "Ответ 1"
-                                    this.questionInfoId = questionId
-                                }
-                                for (j in 2..(2..5).random()) {
+                                val countAnswer = (3..6).random()
+                                val numberRight = (1..countAnswer).random()
+                                for (j in 1..countAnswer) {
                                     AnswerInfo.new {
+                                        if (j == numberRight) {
+                                            this.id._value = rightId
+                                            this.answer = "Ответ $j (right)"
+                                        } else {
+                                            this.answer = "Ответ $j"
+                                        }
                                         this.questionInfoId = questionId
-                                        this.answer = "Ответ $j"
                                     }
                                 }
                             }
@@ -119,6 +127,7 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
     val courseManager: CourseManager by inject()
     val questionManager: QuestionManager by inject()
     val answerManager: AnswerManager by inject()
+
     routing {
         redoc()
         route("api") {
@@ -191,10 +200,10 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                             call.respond(courseManager.getAllCourse())
                         } ?: call.respond(HttpStatusCode.Unauthorized)
                     }
-                    delete {
+                    delete<Param.CourseIdModel> { idCourse ->
                         call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
                             if (adminId == id) {
-                                call.respond(courseManager.deleteCourse(call.receive()))
+                                call.respond(courseManager.deleteCourse(CourseIdModel(idCourse.courseInfoId)))
                             } else {
                                 call.respond(HttpStatusCode.Unauthorized)
                             }
@@ -240,15 +249,15 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                             }
                         } ?: call.respond(HttpStatusCode.Unauthorized)
                     }
-                    get {
+                    get<Param.CourseIdModel> { idCourse ->
                         call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
-                            call.respond(questionManager.getAllQuestion(call.receive()))
+                            call.respond(questionManager.getAllQuestion(CourseIdModel(idCourse.courseInfoId)))
                         } ?: call.respond(HttpStatusCode.Unauthorized)
                     }
-                    delete {
+                    delete<Param.QuestionIdModel> { idQuestion ->
                         call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
                             if (adminId == id) {
-                                call.respond(questionManager.deleteQuestion(call.receive()))
+                                call.respond(questionManager.deleteQuestion(QuestionIdModel(idQuestion.questionInfoId)))
                             } else {
                                 call.respond(HttpStatusCode.Unauthorized)
                             }
@@ -278,10 +287,17 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                             }
                         } ?: call.respond(HttpStatusCode.Unauthorized)
                     }
-                    delete {
+                    delete<Param.DeleteAnswerInfoModel> { deleteModel ->
                         call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
                             if (adminId == id) {
-                                call.respond(answerManager.deleteAnswer(call.receive()))
+                                call.respond(
+                                    answerManager.deleteAnswer(
+                                        DeleteAnswerInfoModel(
+                                            deleteModel.questionInfoId,
+                                            deleteModel.answerInfoId
+                                        )
+                                    )
+                                )
                             } else {
                                 call.respond(HttpStatusCode.Unauthorized)
                             }

@@ -25,7 +25,7 @@ class PutQuestionManagerImpl : PutQuestionManager {
                             }.firstOrNull() == null
                         ) {
                             question.question = request.question
-                        }else{
+                        } else {
                             throw Exception("Такой вопрос уже существует")
                         }
                     }
@@ -42,7 +42,7 @@ class PutQuestionManagerImpl : PutQuestionManager {
                                     }.firstOrNull() == null
                                 ) {
                                     answerInfo.answer = answer.answer
-                                }else{
+                                } else {
                                     throw Exception("Такой ответ уже существует")
                                 }
                             }

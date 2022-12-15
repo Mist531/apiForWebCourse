@@ -53,6 +53,7 @@ dependencies {
     implementation("io.ktor:ktor-server-data-conversion:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
     implementation("io.ktor:ktor-serialization-gson:$ktorVersion")
+    implementation("io.ktor:ktor-server-resources:$ktorVersion")
 
     //exposed
     implementation("org.jetbrains.exposed:exposed-core:$exposedVersion")

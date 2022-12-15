@@ -15,6 +15,7 @@ fun Route.getQuestionDocs() {
             "basic" to emptyList()
         )
         post = PostInfo.builder {
+            isDeprecated()
             tags("Question")
             summary("GET: Получение всех вопросов")
             description(

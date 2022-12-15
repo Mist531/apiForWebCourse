@@ -12,9 +12,12 @@ import io.bkbn.kompendium.core.metadata.GetInfo
 import io.bkbn.kompendium.core.metadata.PostInfo
 import io.bkbn.kompendium.core.metadata.PutInfo
 import io.bkbn.kompendium.core.plugin.NotarizedRoute
+import io.bkbn.kompendium.json.schema.definition.TypeDefinition
+import io.bkbn.kompendium.oas.payload.Parameter
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import java.util.*
 
 fun Route.questionDocs() {
     install(NotarizedRoute()) {
@@ -22,11 +25,24 @@ fun Route.questionDocs() {
             "basic" to emptyList()
         )
         get = GetInfo.builder {
-            isDeprecated()
             tags("Question")
+            parameters(
+                Parameter(
+                    name = "courseInfoId",
+                    `in` = Parameter.Location.path,
+                    schema = TypeDefinition.UUID,
+                    allowEmptyValue = false,
+                    required = true,
+                    description = "Id курса",
+                    examples = mapOf(
+                        "Пример" to Parameter.Example(UUID.randomUUID().toString())
+                    )
+                )
+            )
             summary("Получение всех вопросов")
             description(
-                "Возвращает список вопросов по id курса, модель запроса: { courseInfoId: UUID }"
+                "Возвращает список вопросов по id курса"
+                //, модель запроса: { courseInfoId: UUID }
             )
             response {
                 responseCode(HttpStatusCode.OK)
@@ -73,10 +89,23 @@ fun Route.questionDocs() {
         }
         delete = DeleteInfo.builder {
             tags("Admin Question")
+            parameters(
+                Parameter(
+                    name = "courseInfoId",
+                    `in` = Parameter.Location.path,
+                    schema = TypeDefinition.UUID,
+                    allowEmptyValue = false,
+                    required = true,
+                    description = "Id курса",
+                    examples = mapOf(
+                        "Пример" to Parameter.Example(UUID.randomUUID().toString())
+                    )
+                )
+            )
             summary("Удаление вопроса")
             description(
-                "Доступно только администратору. Удаляет вопрос по id вопроса," +
-                        " модель запроса: \n{ questionInfoId: UUID }"
+                "Доступно только администратору. Удаляет вопрос по id вопроса."
+                //+ " модель запроса: \n{ questionInfoId: UUID }"
             )
             response {
                 responseType<HttpStatusCode>()

@@ -6,7 +6,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.UUIDTable
 import java.util.*
 
-object QuestionsInfo: UUIDTable("QuestionInfo", "questionInfoId")  {
+object QuestionsInfo : UUIDTable("QuestionInfo", "questionInfoId") {
     val question = text("question")
     val courseInfoId = reference("courseInfoId", CoursesInfo)
     val rightAnswerId = uuid("rightAnswerId")

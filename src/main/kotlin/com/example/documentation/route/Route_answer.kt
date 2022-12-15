@@ -9,14 +9,17 @@ import io.bkbn.kompendium.core.metadata.DeleteInfo
 import io.bkbn.kompendium.core.metadata.PostInfo
 import io.bkbn.kompendium.core.metadata.PutInfo
 import io.bkbn.kompendium.core.plugin.NotarizedRoute
+import io.bkbn.kompendium.json.schema.definition.TypeDefinition
+import io.bkbn.kompendium.oas.payload.Parameter
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import java.util.*
 
 fun Route.answerDocs() {
     install(NotarizedRoute()) {
         post = PostInfo.builder {
-            isDeprecated()
+            //isDeprecated()
             tags("Admin Answer")
             summary("Добавить ответ к вопросу")
             description(
@@ -49,12 +52,26 @@ fun Route.answerDocs() {
             }
         }
         delete = DeleteInfo.builder {
-            isDeprecated()
+            //isDeprecated()
+            parameters(
+                Parameter(
+                    name = "{questionInfoId}/{answerInfoId}",
+                    `in` = Parameter.Location.path,
+                    schema = TypeDefinition.UUID,
+                    allowEmptyValue = false,
+                    required = true,
+                    description = "Id курса",
+                    examples = mapOf(
+                        "Пример" to Parameter.Example(UUID.randomUUID().toString()+"/"+UUID.randomUUID().toString())
+                    )
+                )
+            )
             tags("Admin Answer")
             summary("Удалить ответ")
             description(
-                "Доступно только администратору. Модель для удаления ответа:" +
-                        " { questionInfoId: UUID, answerInfoId: UUID }"
+                "Доступно только администратору." /*+
+                        " Модель для удаления ответа:" +
+                        " { questionInfoId: UUID, answerInfoId: UUID }"*/
             )
             response {
                 responseCode(HttpStatusCode.OK)
@@ -79,7 +96,7 @@ fun Route.answerDocs() {
             }
         }
         put = PutInfo.builder {
-            isDeprecated()
+            //isDeprecated()
             tags("Admin Answer")
             summary("Изменить ответ")
             description(

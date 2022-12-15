@@ -21,21 +21,15 @@ val RegisterUsersModelTest = RegisterUserModel(
 val PutUsersModelTest = GetUserModel(
     firstName = "test",
     lastName = "test",
-    patronymic = "test"
+    patronymic = "test",
+    userId = UUID.randomUUID()
 )
 
-val GetListCourseTest = /*listOf(*/
-    CourseModel(
-        courseInfoId = UUID.randomUUID(),
-        name = "Курс 1",
-        description = "Описание курса 1",
-    )/*,
-    CourseModel(
-        courseInfoId = UUID.randomUUID(),
-        name = "Курс 2",
-        description = "Описание курса 2",
-    ),
-)*/
+val GetListCourseTest = CourseModel(
+    courseInfoId = UUID.randomUUID(),
+    name = "Курс 1",
+    description = "Описание курса 1",
+)
 
 val CreateCourseTest = CreateCourseModel(
     name = "Курс 1",

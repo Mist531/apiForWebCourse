@@ -11,13 +11,13 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
-class DeleteQuestionManagerImpl: DeleteQuestionManager {
+class DeleteQuestionManagerImpl : DeleteQuestionManager {
     override suspend operator fun invoke(param: Unit, request: QuestionIdModel): HttpStatusCode =
         newSuspendedTransaction(Dispatchers.IO) {
             val question = QuestionInfo.find {
                 QuestionsInfo.id eq request.questionInfoId
             }.firstOrNull() ?: throw Exception("Вопрос не найден")
-            question.id.value.let { questionId->
+            question.id.value.let { questionId ->
                 AnswerInfo.find {
                     AnswersInfo.questionInfoId eq questionId
                 }.parTraverse {

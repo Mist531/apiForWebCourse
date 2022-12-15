@@ -32,7 +32,7 @@ class CourseManagerImpl : CourseManager, KoinComponent {
     override suspend fun createCourse(course: CreateCourseModel): HttpStatusCode {
         val manager: CreateCourseManager by inject()
         return runCatching {
-            manager.invoke(Unit,course)
+            manager.invoke(Unit, course)
         }.getOrElse {
             it.printStackTrace()
             throw it
@@ -42,7 +42,7 @@ class CourseManagerImpl : CourseManager, KoinComponent {
     override suspend fun deleteCourse(courseId: CourseIdModel): HttpStatusCode {
         val manager: DeleteCourseManager by inject()
         return runCatching {
-            manager.invoke(Unit,courseId)
+            manager.invoke(Unit, courseId)
         }.getOrElse {
             it.printStackTrace()
             throw it
@@ -52,7 +52,7 @@ class CourseManagerImpl : CourseManager, KoinComponent {
     override suspend fun updateCourse(course: PutCourseModel): HttpStatusCode {
         val manager: UpdateCourseManager by inject()
         return runCatching {
-            manager.invoke(Unit,course)
+            manager.invoke(Unit, course)
         }.getOrElse {
             it.printStackTrace()
             throw it
@@ -62,7 +62,7 @@ class CourseManagerImpl : CourseManager, KoinComponent {
     override suspend fun checkCourse(checkCourse: CheckCourseModel): ResultCourseModel {
         val manager: CheckCourseManager by inject()
         return runCatching {
-            manager.invoke(Unit,checkCourse)
+            manager.invoke(Unit, checkCourse)
         }.getOrElse {
             it.printStackTrace()
             throw it

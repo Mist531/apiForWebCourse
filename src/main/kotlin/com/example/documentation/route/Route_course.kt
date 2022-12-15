@@ -12,9 +12,12 @@ import io.bkbn.kompendium.core.metadata.GetInfo
 import io.bkbn.kompendium.core.metadata.PostInfo
 import io.bkbn.kompendium.core.metadata.PutInfo
 import io.bkbn.kompendium.core.plugin.NotarizedRoute
+import io.bkbn.kompendium.json.schema.definition.TypeDefinition
+import io.bkbn.kompendium.oas.payload.Parameter
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
+import java.util.*
 
 fun Route.courseDocs() {
     install(NotarizedRoute()) {
@@ -37,6 +40,19 @@ fun Route.courseDocs() {
             }
         }
         delete = DeleteInfo.builder {
+            parameters(
+                Parameter(
+                    name = "courseInfoId",
+                    `in` = Parameter.Location.path,
+                    schema = TypeDefinition.UUID,
+                    allowEmptyValue = false,
+                    required = true,
+                    description = "Id курса",
+                    examples = mapOf(
+                        "Пример" to Parameter.Example(UUID.randomUUID().toString())
+                    )
+                )
+            )
             tags("Admin Course")
             summary("Удаление курса")
             description(
