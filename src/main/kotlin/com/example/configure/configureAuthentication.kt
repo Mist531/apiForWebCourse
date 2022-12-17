@@ -1,11 +1,12 @@
 package com.example.configure
 
-import io.ktor.server.auth.*
-import io.ktor.server.auth.jwt.*
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.authorization.AuthUtil
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.auth.*
+import io.ktor.server.auth.jwt.*
 import io.ktor.server.response.*
 
 fun Application.configureAuthentication() {
@@ -13,9 +14,9 @@ fun Application.configureAuthentication() {
         basic("basic") {
             jwt("jwt") {
                 realm = System.getenv("JWT_REALM") ?: "test_realm"
-                val jwtAudience = System.getenv("JWT_AUDIENCE") ?: "test_audience"
-                val secret = System.getenv("JWT_SECRET") ?: "test_secret"
-                val domain = System.getenv("JWT_DOMAIN") ?: "test_domain"
+                val jwtAudience = AuthUtil.jwtAudience
+                val secret = AuthUtil.secret
+                val domain = AuthUtil.domain
                 verifier(
                     JWT.require(Algorithm.HMAC256(secret))
                         .withAudience(jwtAudience)

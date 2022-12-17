@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.authorization.AuthRouteUtils
 import com.example.authorization.AuthUtil
 import com.example.authorization.models.TokensModel
 import com.example.configure.configure
@@ -15,6 +16,7 @@ import com.example.managersImpl.CourseManager
 import com.example.managersImpl.QuestionManager
 import com.example.managersImpl.UserManager
 import com.example.models.DeleteAnswerInfoModel
+import com.example.modules.commonModule
 import com.example.modules.managerModule
 import com.example.modules.managersImplModule
 import com.example.modules.mapperModule
@@ -42,6 +44,8 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.koin.ktor.ext.inject
 import java.util.*
 
+val adminId: UUID = UUID.fromString("404c889c-c9ef-457d-880a-9f649a2768fd")
+
 fun main() {
     val url = System.getenv("DB_URL") ?: "jdbc:postgresql://db.fhshwyorwexsjojuohkx.supabase.co:5432/postgres"
     val pass = System.getenv("DB_PASS") ?: "UBhfHX9s6hT@Vty"
@@ -50,7 +54,6 @@ fun main() {
     val host = System.getenv("HOST") ?: "0.0.0.0"
     val adminName = "admin"
 
-    val adminId = UUID.fromString("404c889c-c9ef-457d-880a-9f649a2768fd")
     val listDefaultUUIDCoure = listOf<UUID>(
         UUID.fromString("904fa590-68f1-11ed-9022-0242ac120002"),
         UUID.fromString("5feb7899-437a-4be0-9bd9-fb0420c44ae3"),
@@ -110,23 +113,26 @@ fun main() {
     }
     embeddedServer(Netty, port = port, host = host,
         module = {
-            myApplicationModule(port = port, host = host, adminId = adminId.toString())
+            myApplicationModule(port = port, host = host)
         }
     ).start(wait = true)
 }
 
-fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
+fun Application.myApplicationModule(port: Int, host: String) {
+
     configure(
         port = port,
         host = host,
         listModules = listOf(
-            managerModule, mapperModule, managersImplModule
+            managerModule, mapperModule, managersImplModule, commonModule
         )
     )
+
     val userManager: UserManager by inject()
     val courseManager: CourseManager by inject()
     val questionManager: QuestionManager by inject()
     val answerManager: AnswerManager by inject()
+    val authRouteUtils: AuthRouteUtils by inject()
 
     routing {
         redoc()
@@ -160,10 +166,12 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                     route("info") {
                         userInfoDocs()
                         get {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()
-                                ?.let { id ->
+                            authRouteUtils.authUser(
+                                call = call,
+                                ifRight = { id ->
                                     call.respond(userManager.getUser(UserId(UUID.fromString(id))))
-                                } ?: call.respond(HttpStatusCode.Unauthorized)
+                                }
+                            )
                         }
                     }
                     route("refresh") {
@@ -187,43 +195,46 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                 route("course") {
                     courseDocs()
                     post {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(courseManager.createCourse(call.receive()))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                     get {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
-                            call.respond(courseManager.getAllCourse())
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        authRouteUtils.authUser(
+                            call = call,
+                            ifRight = {
+                                call.respond(courseManager.getAllCourse())
+                            }
+                        )
                     }
                     delete<Param.CourseIdModel> { idCourse ->
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call,
+                            ifRight = {
                                 call.respond(courseManager.deleteCourse(CourseIdModel(idCourse.courseInfoId)))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                     put {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(courseManager.updateCourse(call.receive()))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                     route("check") {
                         checkCourseDocs()
                         post {
-                            call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
-                                call.respond(courseManager.checkCourse(call.receive()))
-                            } ?: call.respond(HttpStatusCode.Unauthorized)
+                            authRouteUtils.authUser(
+                                call = call,
+                                ifRight = {
+                                    call.respond(courseManager.checkCourse(call.receive()))
+                                },
+                            )
                         }
                     }
                 }
@@ -233,44 +244,47 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                 route("getQuestion") {
                     getQuestionDocs()
                     post {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
-                            call.respond(questionManager.getAllQuestion(call.receive()))
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        authRouteUtils.authUser(
+                            call = call,
+                            ifRight = {
+                                call.respond(questionManager.getAllQuestion(call.receive()))
+                            },
+                        )
                     }
                 }
                 route("question") {
                     questionDocs()
                     post {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(questionManager.addQuestion(call.receive()))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                     get<Param.CourseIdModel> { idCourse ->
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let {
-                            call.respond(questionManager.getAllQuestion(CourseIdModel(idCourse.courseInfoId)))
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        authRouteUtils.authUser(
+                            call = call,
+                            ifRight = {
+                                call.respond(questionManager.getAllQuestion(CourseIdModel(idCourse.courseInfoId)))
+                            }
+                        )
                     }
                     delete<Param.QuestionIdModel> { idQuestion ->
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(questionManager.deleteQuestion(QuestionIdModel(idQuestion.questionInfoId)))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                     put {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(questionManager.putQuestion(call.receive()))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                 }
                 //endregion
@@ -279,17 +293,17 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                 route("answer") {
                     answerDocs()
                     post {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(answerManager.postAnswer(call.receive()))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                     delete<Param.DeleteAnswerInfoModel> { deleteModel ->
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(
                                     answerManager.deleteAnswer(
                                         DeleteAnswerInfoModel(
@@ -298,19 +312,16 @@ fun Application.myApplicationModule(port: Int, host: String, adminId: String) {
                                         )
                                     )
                                 )
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                     put {
-                        call.principal<JWTPrincipal>()?.payload?.getClaim("userId")?.asString()?.let { id ->
-                            if (adminId == id) {
+                        authRouteUtils.authAdmin(
+                            call = call,
+                            ifRight = {
                                 call.respond(answerManager.putAnswer(call.receive()))
-                            } else {
-                                call.respond(HttpStatusCode.Unauthorized)
                             }
-                        } ?: call.respond(HttpStatusCode.Unauthorized)
+                        )
                     }
                 }
                 //endregion

@@ -35,7 +35,7 @@ class CheckCourseManagerImpl : CheckCourseManager {
                     }.let {
                         if (
                             QuestionInfo.find(QuestionsInfo.courseInfoId eq request.courseInfoId).count() ==
-                            (rightAnswer + wrongAnswer).toLong()
+                            (request.questions.count()).toLong()
                         ) {
                             ResultCourseModel(rightAnswer, wrongAnswer, listWrongQuestion)
                         } else {

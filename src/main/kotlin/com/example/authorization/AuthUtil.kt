@@ -7,9 +7,9 @@ import kotlin.time.Duration.Companion.days
 
 object AuthUtil {
 
-    private val jwtAudience = System.getenv("JWT_AUDIENCE") ?: "test_audience"
-    private val secret = System.getenv("JWT_SECRET") ?: "test_secret"
-    private val domain = System.getenv("JWT_DOMAIN") ?: "test_domain"
+    val jwtAudience = System.getenv("JWT_AUDIENCE") ?: "test_audience"
+    val secret = System.getenv("JWT_SECRET") ?: "test_secret"
+    val domain = System.getenv("JWT_DOMAIN") ?: "test_domain"
 
     fun buildAccess(id: String): String = JWT.create()
         .withAudience(jwtAudience)
