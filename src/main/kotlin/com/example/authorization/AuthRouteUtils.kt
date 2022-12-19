@@ -8,6 +8,7 @@ import io.ktor.server.response.*
 import org.koin.core.component.KoinComponent
 
 class AuthRouteUtils: KoinComponent {
+
     suspend fun authAdmin(
         call: ApplicationCall,
         ifRight: suspend () -> Unit,
