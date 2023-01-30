@@ -1,5 +1,6 @@
 # apiForWebCourse
 apiForWebCourse - API созданное для получения зачета по вебу. В проекте настроено подключение к внешнему хостингу [supabase](https://supabase.com/).
+UI часть для данного API [uiForWebCourse](https://github.com/Mist531/uiForWebCourse).
 # stack
 ### [Database - PostgreSQL](https://www.postgresql.org/)
 - Open Source Relational Database
